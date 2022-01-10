@@ -1,3 +1,26 @@
-/* body {
-    background-color: pink;
-} */
+/* 全局样式 */
+
+body {
+    background-color: #f5f7f9;
+}
+
+
+/*  nav-bar 样式*/
+
+.app-nav-bar {
+    background-color: #3296fa;
+}
+
+
+/* 登录文字样式 */
+
+.app-nav-bar .van-nav-bar__title {
+    color: #fff;
+}
+
+
+/* < 箭头样式 */
+
+.app-nav-bar .van-icon {
+    color: #fff;
+}
