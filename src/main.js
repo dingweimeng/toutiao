@@ -13,6 +13,7 @@ import 'vant/lib/index.css';
 import 'amfe-flexible'
 // 全局样式要覆盖vant样式  所有放到vant 下面
 import './styles/index.css'
+import '@/utils/dayjs.js'
 // 全局注册vant
 Vue.use(Vant);
 

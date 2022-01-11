@@ -22,17 +22,48 @@
         <!-- 文章列表小组件 -->
         <ArticleList :channel="channel"></ArticleList>
       </van-tab>
+      <!-- 防止汉堡按钮定位后把列表最后位置挡住，添加一个占位元素 -->
+      <div slot="nav-right" class="wap-nav-placeholder"></div>
+      <!-- 汉堡框 -->
+      <div
+        slot="nav-right"
+        @click="isChanelEditShow = true"
+        class="wap-nav-wrap"
+      >
+        <van-icon name="wap-nav" />
+      </div>
     </van-tabs>
+
+    <!-- 汉堡 弹出层 -->
+    <van-popup
+      v-model="isChanelEditShow"
+      position="bottom"
+      :style="{ height: '100%' }"
+      closeable
+      get-container="body"
+    >
+      <!-- 汉堡信息封装组件  父向子传 子向父传-->
+      <ChannelEdit
+        :user-channels="channels"
+        :active="active"
+        @close="isChanelEditShow = false"
+        @update-active="onUpdateActive"
+      ></ChannelEdit>
+    </van-popup>
   </div>
 </template>
 
 <script>
 import { getUserChannels } from '@/api/user.js'
+// 文章列表封装组件
 import ArticleList from './components/article-list.vue'
+// 汉堡信息封装组件
+import ChannelEdit from './components/channel-edit.vue'
 export default {
   name: 'HomeIndex',
   components: {
     ArticleList,
+    ChannelEdit,
   },
   props: [],
   data() {
@@ -41,6 +72,8 @@ export default {
       active: 0,
       // 请求回来的文章列表
       channels: [],
+      // 弹出层默认关闭
+      isChanelEditShow: true,
     }
   },
   computed: {},
@@ -55,6 +88,12 @@ export default {
       const { data } = await getUserChannels()
       // console.log(data)
       this.channels = data.data.channels
+    },
+
+    // 子向父传值  更新索引
+    onUpdateActive(index) {
+      // console.log(index)
+      this.active = index
     },
   },
 }
@@ -93,6 +132,29 @@ export default {
       background-color: #3296fa;
       bottom: 20px;
     }
+  }
+  // 汉堡样式
+  .wap-nav-wrap {
+    position: fixed;
+    right: 0;
+    width: 33px;
+    height: 44px;
+    line-height: 44px;
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0.9;
+    // 图标
+    .van-icon {
+      font-size: 25px;
+    }
+  }
+  // 汉堡占位符
+  .wap-nav-placeholder {
+    width: 33px;
+    // flex 布局 这个不参与平分空间
+    flex-shrink: 0;
   }
 }
 </style>
