@@ -115,7 +115,7 @@ export default {
     // 获取用户信息
     async loadCurrentUser() {
       const { data } = await getCurrentUser()
-      console.log(data)
+      // console.log(data)
       this.currentUser = data.data
     },
   },

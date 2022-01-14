@@ -9,6 +9,7 @@
         size="small"
         round
         type="info"
+        to="/search"
         >搜索</van-button
       >
     </van-nav-bar>
@@ -59,6 +60,8 @@ import { getUserChannels } from '@/api/user.js'
 import ArticleList from './components/article-list.vue'
 // 汉堡信息封装组件
 import ChannelEdit from './components/channel-edit.vue'
+import { mapState } from 'vuex'
+import { getItem } from '@/utils/storage.js'
 export default {
   name: 'HomeIndex',
   components: {
@@ -73,10 +76,12 @@ export default {
       // 请求回来的文章列表
       channels: [],
       // 弹出层默认关闭
-      isChanelEditShow: true,
+      isChanelEditShow: false,
     }
   },
-  computed: {},
+  computed: {
+    ...mapState(['user']),
+  },
   watch: {},
   created() {
     this.loadChannels()
@@ -85,9 +90,24 @@ export default {
   methods: {
     // 请求获取频道数据
     async loadChannels() {
-      const { data } = await getUserChannels()
-      // console.log(data)
-      this.channels = data.data.channels
+      let channels = []
+      if (this.user) {
+        // 已登录，获取接口
+        const { data } = await getUserChannels()
+        channels = data.data.channels
+      } else {
+        // 没有登录，判断是否有本地存储
+        const localChannels = getItem('user-channels')
+        // 如果有本地存储的频道列表就使用
+        if (localChannels) {
+          channels = localChannels
+        } else {
+          // 没有登录 ，也没有本地存储，求请求默认推荐频道
+          const { data } = await getUserChannels()
+          channels = data.data.channels
+        }
+      }
+      this.channels = channels
     },
 
     // 子向父传值  更新索引
