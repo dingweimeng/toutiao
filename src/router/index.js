@@ -50,6 +50,15 @@ const routes = [
         name: 'search',
         component: () =>
             import ('@/views/search/index.vue')
+    },
+
+    {
+        path: '/article/:articleId',
+        name: 'article',
+        component: () =>
+            import ('@/views/article/index.vue'),
+        // 开启路由传参
+        props: true
     }
 
 ]
