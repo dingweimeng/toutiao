@@ -8,44 +8,58 @@
       @click-left="$router.back()"
     />
     <!-- 导航栏 -->
-    <h1 class="title">{{ article.title }}</h1>
-    <van-cell center class="user-info">
-      <van-image
-        class="avatar"
-        slot="icon"
-        fit="cover"
-        round
-        :src="article.aut_photo"
-      />
-      <div slot="title" class="name">{{ article.aut_name }}</div>
-      <div slot="label" class="pubdate">
-        {{ article.pubdate | relativeTime }}
-      </div>
-      <van-button
-        :type="article.is_followed ? 'default' : 'info'"
-        round
-        size="small"
-        :icon="article.is_followed ? '' : 'plus'"
-        class="follow-btn"
-        :loading="isFollowLoading"
-        @click="onFollow"
-        >{{ article.is_followed ? '已关注' : '关注' }}</van-button
-      >
-    </van-cell>
+    <div class="article-weap">
+      <h1 class="title">{{ article.title }}</h1>
+      <van-cell center class="user-info">
+        <van-image
+          class="avatar"
+          slot="icon"
+          fit="cover"
+          round
+          :src="article.aut_photo"
+        />
+        <div slot="title" class="name">{{ article.aut_name }}</div>
+        <div slot="label" class="pubdate">
+          {{ article.pubdate | relativeTime }}
+        </div>
+        <van-button
+          :type="article.is_followed ? 'default' : 'info'"
+          round
+          size="small"
+          :icon="article.is_followed ? '' : 'plus'"
+          class="follow-btn"
+          :loading="isFollowLoading"
+          @click="onFollow"
+          >{{ article.is_followed ? '已关注' : '关注' }}</van-button
+        >
+      </van-cell>
 
-    <!-- 文章正文 -->
-    <div
-      ref="article-content"
-      class="markdown-body"
-      v-html="article.contend"
-    ></div>
+      <!-- 文章正文 -->
+      <div
+        ref="article-content"
+        class="markdown-body"
+        v-html="article.contend"
+      ></div>
+      <!-- 文章评论列表模块 -->
+      <commentList
+        :source="articleId"
+        :list="commentList"
+        @update-total-count="totalCommentCount = $event"
+      ></commentList>
+    </div>
+
     <!-- 底部区域 -->
     <div class="article-bottom">
-      <van-button class="comment-btn" type="default" round size="small"
+      <van-button
+        class="comment-btn"
+        type="default"
+        round
+        size="small"
+        @click="isPostShow = true"
         >写评论</van-button
       >
       <!-- 评论 -->
-      <van-icon name="comment-o" info="123" color="#777" />
+      <van-icon name="comment-o" :info="totalCommentCount" color="#777" />
       <!-- 收藏 -->
       <van-icon
         :color="article.is_collected ? 'orange' : '#777'"
@@ -61,6 +75,13 @@
       <!-- 转发 -->
       <van-icon name="share" color="#777777"></van-icon>
     </div>
+    <!-- 发布评论 -->
+    <van-popup v-model="isPostShow" position="bottom">
+      <PostComment
+        :target="articleId"
+        @post-success="onPostSuccess"
+      ></PostComment>
+    </van-popup>
   </div>
 </template>
 
@@ -79,10 +100,17 @@ import {
 import { ImagePreview } from 'vant'
 // 封装接口
 import { addFollow, daleteFollow } from '@/api/user.js'
+// 引入评论模块
+import commentList from './components/comment-list.vue'
+// 引入发布评论
+import PostComment from './components/post-comment.vue'
 
 export default {
   name: 'ArticleIndex',
-  components: {},
+  components: {
+    commentList,
+    PostComment,
+  },
   props: {
     // 传过来的id
     articleId: {
@@ -96,6 +124,12 @@ export default {
       article: {},
       // 关注用户的loading 状态
       isFollowLoading: false,
+      // 控制评论的 显示隐藏
+      isPostShow: false,
+      // 文章评论列表
+      commentList: [],
+      // 评论的总数量
+      totalCommentCount: 0,
     }
   },
   computed: {},
@@ -107,7 +141,7 @@ export default {
   methods: {
     async loadArticle() {
       const { data } = await getArticleById(this.articleId)
-      console.log(data)
+      // console.log(data)
       this.article = data.data
 
       // 数据该把影响视图更新(DOM数据) 不是立即的，需要把代码放到$nextTick 中
@@ -184,11 +218,29 @@ export default {
         `${this.article.attitude === 1 ? '' : '取消'}点赞成功`
       )
     },
+    // 子组件传来的
+    onPostSuccess(comment) {
+      // 把发布成功的评论数据对象放到评论列表顶部
+      this.commentList.unshift(comment)
+      // 更新评论数量
+      this.totalCommentCount++
+
+      // 关闭发布评论弹出层
+      this.isPostShow = false
+    },
   },
 }
 </script>
 
 <style scoped lang="less">
+.article-weap {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 46px;
+  bottom: 44px;
+  overflow-y: auto;
+}
 .title {
   font-size: 20px;
   color: 3a3a3a;
