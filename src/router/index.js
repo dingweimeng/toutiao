@@ -59,6 +59,12 @@ const routes = [
             import ('@/views/article/index.vue'),
         // 开启路由传参
         props: true
+    },
+    {
+        path: '/user',
+        name: 'user-index',
+        component: () =>
+            import ('@/views/user/index.vue')
     }
 
 ]
