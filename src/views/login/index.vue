@@ -118,8 +118,11 @@ export default {
         this.$toast.success('登录成功')
         // 登录成功存token 存vuex中管理
         this.$store.commit('setUser', data.data)
-        // 跳转页面
-        this.$router.back()
+        // 清除layout 的缓存，让他重新渲染
+        this.$store.commit('removeCachePage', 'LayoutIndex')
+        // 跳转页面 back 有问题
+        // this.$router.back()
+        this.$router.push(this.$route.query.required || '/')
       } catch (err) {
         console.log('登录失败', err)
         this.$toast.fail('登录失败，手机号或验证码错误')

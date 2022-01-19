@@ -1,6 +1,6 @@
 // 文章列表这个文件
 <template>
-  <div class="article-list">
+  <div class="article-list" ref="article-list">
     <!-- 下拉刷新组件包裹 -->
     <van-pull-refresh
       v-model="isRefreshLoading"
@@ -30,6 +30,8 @@
 import { getArticles } from '@/api/article.js'
 // 列表公告组件
 import ArticleItem from '@/components/article-item/index.vue'
+// 防抖
+import { debounce } from 'lodash'
 export default {
   name: 'ArticleList',
   components: {
@@ -55,12 +57,24 @@ export default {
       isRefreshLoading: false,
       // 下拉刷新成功提示文本
       refreshSuccessText: '',
+      // 列表距离顶部距离
+      scrollTop: 0,
     }
   },
   computed: {},
   watch: {},
   created() {},
-  mounted() {},
+  mounted() {
+    const articleList = this.$refs['article-list']
+    articleList.onscroll = debounce(() => {
+      console.log(articleList.scrollTop)
+      this.scrollTop = articleList.scrollTop
+    }, 50)
+  },
+  // 解决缓存带来的问题
+  activated() {
+    this.$refs['article-list'].scrollTop = this.scrollTop
+  },
   methods: {
     // 获取文章列表数据
     async onLoad() {
